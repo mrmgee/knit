@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knitting Needle Catalog</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Knitting Needle Catalog</h1>
+
+        <!-- Add Needle Form with Dropdowns -->
+        <form id="needleForm">
+            <label for="type">Type:</label>
+            <select id="type" required>
+                <option value="">--Select Type--</option>
+                <option value="Straight">Straight</option>
+                <option value="Circular">Circular</option>
+                <option value="Double Pointed">Double Pointed</option>
+            </select>
+
+            <label for="material">Material:</label>
+            <select id="material" required>
+                <option value="">--Select Material--</option>
+                <option value="Wood">Wood</option>
+                <option value="Metal">Metal</option>
+                <option value="Plastic">Plastic</option>
+                <option value="Bamboo">Bamboo</option>
+            </select>
+
+<!--
+            <label for="sizeMM">Size (mm):</label>
+            <input type="number" id="sizeMM" step="0.1" required>
+-->
+
+
+<label for="sizesel">Size:</label>
+<select id="sizesel" required>
+                <option value="">--Select size --</option>
+                <!--
+                <option value="xx">(xx mm)</option>
+                -->
+                <option value="000 (1.50 mm)">000 (1.50 mm)</option>
+                <option value="00 (1.75 mm)">00 (1.75 mm)</option>
+                <option value="0 (2.00 mm)">0 (2.00 mm)</option>
+                <option value="1 (2.25 mm)">1 (2.25 mm)</option>
+                <option value="1.5 (2.50 mm)">1.5 (2.50 mm)</option>
+                <option value="2 (2.75 mm)">2 (2.75 mm)</option>
+                <option value="2.5 (3.00 mm)">2.5 (3.00 mm)</option>
+                <option value="3 (3.25 mm)">3 (3.25 mm)</option>
+                <option value="4 (3.50 mm)">4 (3.50 mm)</option>
+
+                <option value="5 (3.75 mm)">5 (3.75 mm)</option>
+                <option value="6 (4.00 mm)">6 (4.00 mm)</option>
+                <option value="7 (4.50 mm)">7 (4.50 mm)</option>
+                <option value="8 (5.00 mm)">8 (5.00 mm)</option>
+                <option value="9 (5.50 mm)">9 (5.50 mm)</option>
+                <option value="10 (6.00 mm)">10 (6.00 mm)</option>
+                <option value="10.5 (6.50 mm)">10.5 (6.50 mm)</option>
+                <option value="11 (8.00 mm)">11 (8.00 mm)</option>
+                <option value="13 (9.00 mm)">13 (9.00 mm)</option>
+                <option value="15 (10.00 mm)">15 (10.00 mm)</option>
+                <option value="17 (12.00 mm)">17 (12.00 mm)</option>
+                <option value="19 (15.00 mm)">19 (15.00 mm)</option>
+                <option value="35 (19.00 mm)">35 (19.00 mm)</option>
+                <option value="36 (20.00 mm)">36 (20.00 mm)</option>
+                <option value="50 (25.00 mm)">50 (25.00 mm)</option>
+
+
+            </select>
+
+
+<!--
+            <label for="sizeUS">Size (US):</label>
+            <input type="text" id="sizeUS">
+-->
+
+            <label for="length">Length:</label>
+            <select id="length" required>
+                <option value="">--Select length --</option>
+                
+                <option value="6 in">6 in</option>
+                <option value="7 in">7 in</option>
+                <option value="8 in">8 in</option>
+                <option value="9 in">9 in</option>
+                <option value="10 in">10 in</option>
+                <option value="11 in">11 in</option>
+                <option value="12 in">12 in</option>
+                <option value="13 in">13 in</option>
+                <option value="14 in">14 in</option>
+                <option value="15 in">15 in</option>
+                <option value="16 in">16 in</option>
+
+            </select>
+
+
+
+
+            <button type="submit">Add Needle</button>
+        </form>
+
+        <!-- Sorting Controls -->
+        <div class="sort-controls">
+            <label for="sortKey">Sort by:</label>
+            <select id="sortKey" onchange="displayNeedles()">
+                <option value="sizesel">Size</option>
+                <option value="type">Type</option>
+                <option value="material">Material</option>
+            </select>
+        </div>
+
+        <!-- Needle List Display -->
+        <h2>My Needles</h2>
+        <div id="needleList">
+            <!-- Needles will be dynamically added here -->
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
