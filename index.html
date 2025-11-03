@@ -237,7 +237,7 @@ button:hover {
             document.getElementById('material').value = ''; // Reset select to default
         }
         
-               function displayNeedles() {
+        function displayNeedles() {
             const needles = getNeedles();
             const sortKey = document.getElementById('sortKey').value;
         
@@ -281,18 +281,6 @@ button:hover {
                     <span> ${needle.type}</span> |
                     <span> ${needle.material}</span> |
                     <span> ${needle.length}</span>
-                    <button class="delete-btn" onclick="deleteNeedle(${needle.id})">Delete</button>
-                `;
-                needleList.appendChild(needleItem);
-            });
-        }
-                const needleItem = document.createElement('div');
-                needleItem.classList.add('needle-item');
-                needleItem.innerHTML = `
-                    <span><strong>Size:</strong> ${needle.sizesel} </span>
-                    <span><strong>Type:</strong> ${needle.type}</span>
-                    <span><strong>Material:</strong> ${needle.material}</span>
-                    <span><strong>Length:</strong> ${needle.length}</span>
                     <button class="delete-btn" onclick="deleteNeedle(${needle.id})">Delete</button>
                 `;
                 needleList.appendChild(needleItem);
