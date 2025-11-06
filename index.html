@@ -9,31 +9,43 @@
     <style>
         body .container #needleList h4 {
             padding: 0.2rem;
-            background-color: #B7D9FC !important;
+            color: #CBFCE1;
+            background-color: #00895A !important;
         }
         html[data-theme="dark"] #needleList h4 {
+            padding: 0.2rem;
             color: #fff;
-            background-color: #061E2F !important;
+            background-color: #00895A !important;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="grid">
-            <h1>Kneedle Cache</h1>
-            <div></div>
-            <span id="themeToggle" class="contrast" aria-label="Turn off dark mode" data-discover="true">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32" fill="currentColor" class="icon-theme-toggle  moon">
-                    <clipPath id="theme-toggle-cutout">
-                        <path d="M0-11h25a1 1 0 0017 13v30H0Z"></path>
-                    </clipPath>
-                    <g clip-path="url(#theme-toggle-cutout)">
-                        <circle cx="16" cy="16" r="8.4"></circle>
-                        <path d="M18.3 3.2c0 1.3-1 2.3-2.3 2.3s-2.3-1-2.3-2.3S14.7.9 16 .9s2.3 1 2.3 2.3zm-4.6 25.6c0-1.3 1-2.3 2.3-2.3s2.3 1 2.3 2.3-1 2.3-2.3 2.3-2.3-1-2.3-2.3zm15.1-10.5c-1.3 0-2.3-1-2.3-2.3s1-2.3 2.3-2.3 2.3 1 2.3 2.3-1 2.3-2.3 2.3zM3.2 13.7c1.3 0 2.3 1 2.3 2.3s-1 2.3-2.3 2.3S.9 17.3.9 16s1-2.3 2.3-2.3zm5.8-7C9 7.9 7.9 9 6.7 9S4.4 8 4.4 6.7s1-2.3 2.3-2.3S9 5.4 9 6.7zm16.3 21c-1.3 0-2.3-1-2.3-2.3s1-2.3 2.3-2.3 2.3 1 2.3 2.3-1 2.3-2.3 2.3zm2.4-21c0 1.3-1 2.3-2.3 2.3S23 7.9 23 6.7s1-2.3 2.3-2.3 2.4 1 2.4 2.3zM6.7 23C8 23 9 24 9 25.3s-1 2.3-2.3 2.3-2.3-1-2.3-2.3 1-2.3 2.3-2.3z"></path>
-                    </g>
-                </svg>
-            </span>
-        </div>
+        <nav>
+            <ul>
+              <li><img src="kneedle-logo.svg" alt="Kneedle Cache logo" height="100"  width="100" /></li>
+              <li><h3>Kneedle Cache</h3></li>
+
+                <li>
+                    <span id="themeToggle" class="contrast" aria-label="Turn off dark mode" data-discover="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32" fill="currentColor" class="icon-theme-toggle  moon">
+                            <clipPath id="theme-toggle-cutout">
+                                <path d="M0-11h25a1 1 0 0017 13v30H0Z"></path>
+                            </clipPath>
+                            <g clip-path="url(#theme-toggle-cutout)">
+                                <circle cx="16" cy="16" r="8.4"></circle>
+                                <path d="M18.3 3.2c0 1.3-1 2.3-2.3 2.3s-2.3-1-2.3-2.3S14.7.9 16 .9s2.3 1 2.3 2.3zm-4.6 25.6c0-1.3 1-2.3 2.3-2.3s2.3 1 2.3 2.3-1 2.3-2.3 2.3-2.3-1-2.3-2.3zm15.1-10.5c-1.3 0-2.3-1-2.3-2.3s1-2.3 2.3-2.3 2.3 1 2.3 2.3-1 2.3-2.3 2.3zM3.2 13.7c1.3 0 2.3 1 2.3 2.3s-1 2.3-2.3 2.3S.9 17.3.9 16s1-2.3 2.3-2.3zm5.8-7C9 7.9 7.9 9 6.7 9S4.4 8 4.4 6.7s1-2.3 2.3-2.3S9 5.4 9 6.7zm16.3 21c-1.3 0-2.3-1-2.3-2.3s1-2.3 2.3-2.3 2.3 1 2.3 2.3-1 2.3-2.3 2.3zm2.4-21c0 1.3-1 2.3-2.3 2.3S23 7.9 23 6.7s1-2.3 2.3-2.3 2.4 1 2.4 2.3zM6.7 23C8 23 9 24 9 25.3s-1 2.3-2.3 2.3-2.3-1-2.3-2.3 1-2.3 2.3-2.3z"></path>
+                            </g>
+                        </svg>
+                    </span>
+                </li>
+            </ul>
+          </nav>
+
+
+
+
+
 
         <!-- Add Needle Form with Dropdowns -->
         <form id="needleForm">
@@ -63,51 +75,46 @@
 
 <label for="sizesel">Size:</label>
 <select id="sizesel" required>
-                <option value="">--Select size --</option>
-                <!--
-                <option value="xx">(xx mm)</option>
-                -->
-                <option value="000 (1.50 mm)">000 (1.50 mm)</option>
-                <option value="00 (1.75 mm)">00 (1.75 mm)</option>
-                <option value="0 (2.00 mm)">0 (2.00 mm)</option>
-                <option value="1 (2.25 mm)">1 (2.25 mm)</option>
-                <option value="1.5 (2.50 mm)">1.5 (2.50 mm)</option>
-                <option value="2 (2.75 mm)">2 (2.75 mm)</option>
-                <option value="2.5 (3.00 mm)">2.5 (3.00 mm)</option>
-                <option value="3 (3.25 mm)">3 (3.25 mm)</option>
-                <option value="4 (3.50 mm)">4 (3.50 mm)</option>
+                <option value="">-- Select size --</option>
+                <option value="000">000 (1.50 mm)</option>
+                <option value="00">00 (1.75 mm)</option>
+                <option value="0">0 (2.00 mm)</option>
+                <option value="1">1 (2.25 mm)</option>
+                <option value="1.5">1.5 (2.50 mm)</option>
+                <option value="2">2 (2.75 mm)</option>
+                <option value="2.5">2.5 (3.00 mm)</option>
+                <option value="3">3 (3.25 mm)</option>
+                <option value="4">4 (3.50 mm)</option>
 
-                <option value="5 (3.75 mm)">5 (3.75 mm)</option>
-                <option value="6 (4.00 mm)">6 (4.00 mm)</option>
-                <option value="7 (4.50 mm)">7 (4.50 mm)</option>
-                <option value="8 (5.00 mm)">8 (5.00 mm)</option>
-                <option value="9 (5.50 mm)">9 (5.50 mm)</option>
-                <option value="10 (6.00 mm)">10 (6.00 mm)</option>
-                <option value="10.5 (6.50 mm)">10.5 (6.50 mm)</option>
-                <option value="11 (8.00 mm)">11 (8.00 mm)</option>
-                <option value="13 (9.00 mm)">13 (9.00 mm)</option>
-                <option value="15 (10.00 mm)">15 (10.00 mm)</option>
-                <option value="17 (12.00 mm)">17 (12.00 mm)</option>
-                <option value="19 (15.00 mm)">19 (15.00 mm)</option>
-                <option value="35 (19.00 mm)">35 (19.00 mm)</option>
-                <option value="36 (20.00 mm)">36 (20.00 mm)</option>
-                <option value="50 (25.00 mm)">50 (25.00 mm)</option>
+                <option value="5">5 (3.75 mm)</option>
+                <option value="6">6 (4.00 mm)</option>
+                <option value="7">7 (4.50 mm)</option>
+                <option value="8">8 (5.00 mm)</option>
+                <option value="9">9 (5.50 mm)</option>
+                <option value="10">10 (6.00 mm)</option>
+                <option value="10.5">10.5 (6.50 mm)</option>
+                <option value="11">11 (8.00 mm)</option>
+                <option value="13">13 (9.00 mm)</option>
+                <option value="15">15 (10.00 mm)</option>
+                <option value="17">17 (12.00 mm)</option>
+                <option value="19">19 (15.00 mm)</option>
+                <option value="35">35 (19.00 mm)</option>
+                <option value="36">36 (20.00 mm)</option>
+                <option value="50">50 (25.00 mm)</option>
 
 
             </select>
 
 
-<!--
-            <label for="sizeUS">Size (US):</label>
-            <input type="text" id="sizeUS">
--->
 
             <label for="length">Length:</label>
             <select id="length" required>
-                <option value="">--Select length --</option>
+                <option value="">-- Select length --</option>
                 
+                <option value="5 in">5 in</option>
                 <option value="6 in">6 in</option>
                 <option value="7 in">7 in</option>
+                <option value="7.5 in">7.5 in</option>
                 <option value="8 in">8 in</option>
                 <option value="9 in">9 in</option>
                 <option value="10 in">10 in</option>
@@ -115,9 +122,13 @@
                 <option value="12 in">12 in</option>
                 <option value="13 in">13 in</option>
                 <option value="14 in">14 in</option>
-                <option value="15 in">15 in</option>
                 <option value="16 in">16 in</option>
-
+                <option value="24 in">24 in</option>
+                <option value="29 in">29 in</option>
+                <option value="32 in">32 in</option>
+                <option value="40 in">40 in</option>
+                <option value="47 in">47 in</option>
+                <option value="60 in">60 in</option>
             </select>
 
 
@@ -130,8 +141,8 @@
         <div class="sort-controls">
             <label for="sortKey">Sort by:</label>
             <select id="sortKey" onchange="displayNeedles()">
-                <option value="sizesel">Size</option>
                 <option value="type">Type</option>
+                <option value="sizesel">Size</option>
                 <option value="material">Material</option>
             </select>
         </div>
@@ -208,15 +219,46 @@
                 alert("Please select Type, Material, Size and Length.");
                 return;
             }
-        
-        
-        
+
+            // Match US sizes to mm equivalents
+            const sizeUS = sizesel;
+
+            const usToMmMap = {
+                '000': '1.50',
+                '00': '1.75',
+                '0': '2.00',
+                '1': '2.25',
+                '1.5': '2.50',
+                '2': '2.75',
+                '2.5': '3.00',
+                '3': '3.25',
+                '4': '3.50',
+                '5': '3.75',
+                '6': '4.00',
+                '7': '4.50',
+                '8': '5.00',
+                '9': '5.50',
+                '10': '6.00',
+                '10.5': '6.50',
+                '11': '8.00',
+                '13': '9.00',
+                '15': '10.00',
+                '17': '12.00',
+                '19': '15.00',
+                '35': '19.00',
+                '36': '20.00',
+                '50': '25.00'
+            };
+            let usSizeAlt = sizesel; // Input US size (using a string key here for flexibility)
+            // Use the bracket notation to get the value, with a fallback for unknown sizes
+            let sizeMM = usToMmMap[usSizeAlt] || "Unknown size";
         
             const newNeedle = {
                 id: Date.now(), // Unique ID
                 type,
                 material,
                 sizesel,
+                sizeMM,
                 length
             };
         
@@ -262,7 +304,7 @@
 
                     // Append the actual item content
                     let sortMat = document.createElement('h4');  // Sort param header
-                    sortMat.innerHTML = ` ${sortCurrent} `;
+                    sortMat.innerHTML = `${sortCurrent} `;
                     needleList.appendChild(sortMat);
                 }
 
@@ -270,11 +312,16 @@
                 const needleItem = document.createElement('details');
                 needleItem.classList.add('needle-item');
                 needleItem.innerHTML = `
-                    <summary>${needle.sizesel}</summary>
+                    <summary>
+                        <div role="group">
+                            <div>US ${needle.sizesel}</div>
+                            <div>${needle.type}</div>
+                            <div>${needle.length}</div>
+                        </div>
+                    </summary>
                     <div class="grid">
-                        <div>${needle.type}</div>
                         <div>${needle.material}</div>
-                        <div>${needle.length}</div>
+                        <div>${needle.sizeMM} mm</div>
                         <button class="delete-btn" onclick="deleteNeedle(${needle.id})">Delete</button>
                     </div>
                 `;
@@ -326,6 +373,9 @@
         // 5. Clean up the object URL
         URL.revokeObjectURL(url);
     }
+
+
+
 
     </script>
 </body>
