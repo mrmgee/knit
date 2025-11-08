@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kneedle Cache</title>
-<!--    <link rel="stylesheet" href="styles.css"> -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
     <style>
         body .container #needleList h4 {
@@ -16,6 +15,9 @@
             padding: 0.2rem;
             color: #fff;
             background-color: #00895A !important;
+        }
+        .hide {
+            display: none;
         }
     </style>
 </head>
@@ -50,12 +52,18 @@
         <!-- Add Needle Form with Dropdowns -->
         <form id="needleForm">
             <label for="type">Type:</label>
-            <select id="type" required>
+            <select id="type" required onchange="showSubset()">
                 <option value="">--Select Type--</option>
                 <option value="Straight">Straight</option>
                 <option value="Circular">Circular</option>
                 <option value="Double Pointed">Double Pointed</option>
                 <option value="Other">Other</option>
+            </select>
+
+            <select id="typeSubset" class="hide">
+                <option value="">--Select Set--</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
             </select>
 
             <label for="material">Material:</label>
@@ -162,6 +170,16 @@
 
     <script>
 
+        //Display Set if DPN selected
+        function showSubset() {
+            if (type.value == 'Double Pointed') {
+                document.getElementById('typeSubset').classList.remove('hide');
+            } else {
+                document.getElementById('typeSubset').classList.add('hide');
+            }
+
+        }
+
         //Theme toggle
         const themeToggle = document.getElementById('themeToggle');
         const htmlElement = document.documentElement; // or document.body
@@ -209,6 +227,7 @@
         function addNeedle() {
             // Get values from dropdowns and inputs
             const type = document.getElementById('type').value;
+            const typesub = document.getElementById('typeSubset').value;
             const material = document.getElementById('material').value;
             const sizesel = document.getElementById('sizesel').value;
         
@@ -256,6 +275,7 @@
             const newNeedle = {
                 id: Date.now(), // Unique ID
                 type,
+                typesub,
                 material,
                 sizesel,
                 sizeMM,
@@ -269,6 +289,8 @@
             document.getElementById('needleForm').reset();
             document.getElementById('type').value = ''; // Reset select to default
             document.getElementById('material').value = ''; // Reset select to default
+
+            document.getElementById('typeSubset').classList.add('hide'); //reset Type Set subcategory
         }
         
         function displayNeedles() {
@@ -287,6 +309,7 @@
             const needleList = document.getElementById('needleList');
             needleList.innerHTML = ''; // Clear current list
             let lastCategory = null;
+            
         
             needles.forEach(needle => {
 
@@ -311,21 +334,44 @@
 
                 const needleItem = document.createElement('details');
                 needleItem.classList.add('needle-item');
+                
+
+
+                const keyToCheck = 'typesub';
+                let typesubdiv = '';
+
+                if (needle.hasOwnProperty(keyToCheck)) {
+                    const value = needle[keyToCheck];
+                    if (value !== null && value !== undefined && value !== '') {
+                        console.log(`The key '${keyToCheck}' exists and its value is not empty.`);
+                        typesubdiv = ` (Set: ${needle.typesub})`;
+                        needle.typesub = 'nowThis';
+                    } else {
+                        console.log(`The key '${keyToCheck}' exists but its value is empty.`);
+                        //typesubdiv = 'poop';
+                    }
+                }
+
+
                 needleItem.innerHTML = `
                     <summary>
                         <div role="group">
-                            <div>US ${needle.sizesel}</div>
+                            <div>${needle.sizesel}${typesubdiv}</div>
                             <div>${needle.type}</div>
                             <div>${needle.length}</div>
                         </div>
                     </summary>
-                    <div class="grid">
+                    <div id="needle-item-det" class="grid">
                         <div>${needle.material}</div>
                         <div>${needle.sizeMM} mm</div>
                         <button class="delete-btn" onclick="deleteNeedle(${needle.id})">Delete</button>
                     </div>
                 `;
                 needleList.appendChild(needleItem);
+
+                console.log(needle.typesub);
+
+
             });
         }
         
@@ -373,9 +419,6 @@
         // 5. Clean up the object URL
         URL.revokeObjectURL(url);
     }
-
-
-
 
     </script>
 </body>
