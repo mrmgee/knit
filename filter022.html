@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>filter022 Sort and Filter Needles (Table Display)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <style>
+        /* Minimal CSS for the Modal */
+        .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); }
+        .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 300px; }
+        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close:hover, .close:focus { color: black; text-decoration: none; cursor: pointer; }
+        .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+        .form-group {
+            width: 100%;
+            display: flex; /* Makes the container a flex container */
+            align-items: center; /* Vertically aligns the items in the center */
+            gap: 10px; /* Adds space between the label and the select element */
+        }
+        select {
+            width: auto !important;
+            padding: 0.4rem !important;
+        }
+        select#sortBy {
+            width: 40% !important;
+
+        }
+    </style>
+    
+    <!-- Load the data file first -->
+    <script src="needles-filter022.js"></script>
+</head>
+<body>
+    <h1>filter022 Sort and Filter Knitting Needles</h1>
+
+    <div class="controls">
+        <!-- Sort Control -->
+        <div class="form-group">
+            <label for="sortBy">Sort By:</label>
+            <select id="sortBy" onchange="processNeedles()">
+                <option value="type">Type</option>
+                <option value="material">Material</option>
+                <option value="size">Size (US)</option>
+                <option value="length">Length (in)</option>
+                <!-- Add Sets to sort options -->
+                <option value="sets">Sets</option>
+            </select>
+            <button onclick="resetNeedles()">Reset All</button>
+        </div>
+        
+        <!-- Filter 1 Controls (Same as before) -->
+        <label for="filterKey1">Filter 1:</label>
+        <select id="filterKey1" onchange="updateFilterValuesDropdown(1)">
+            <option value="none">None</option>
+            <option value="type">Type</option>
+            <option value="material">Material</option>
+            <option value="size">Size (US)</option>
+            <option value="length">Length (in)</option>
+            <option value="sets">Sets</option>
+        </select>
+        <label for="filterValue1">By:</label>
+        <select id="filterValue1" onchange="processNeedles()" disabled>
+            <option value="all">All Values</option>
+        </select>
+
+        <!-- Filter 2 Controls (Same as before) -->
+        <label for="filterKey2">Filter 2:</label>
+        <select id="filterKey2" onchange="updateFilterValuesDropdown(2)">
+            <option value="none">None</option>
+            <option value="type">Type</option>
+            <option value="material">Material</option>
+            <option value="size">Size (US)</option>
+            <option value="length">Length (in)</option>
+             <option value="sets">Sets</option>
+        </select>
+        <label for="filterValue2">By:</label>
+        <select id="filterValue2" onchange="processNeedles()" disabled>
+            <option value="all">All Values</option>
+        </select>
+
+    </div>
+
+    <h2>Needle List</h2>
+    <table width="100%">
+        <thead>
+            <!-- ADDED NEW HEADER -->
+            <tr><th>Size (US)</th><th>Type</th><th>Material</th><th>Size (mm)</th><th>Length (in)</th><th>Sets (DPNs)</th></tr>
+        </thead>
+        <tbody id="needleList">
+            <!-- Needles will be dynamically inserted here -->
+        </tbody>
+    </table>
+
+    <!-- The Edit Modal (Updated Inputs) -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Edit Needle</h2>
+            <form id="editForm">
+                <input type="hidden" id="edit-id">
+                <input type="hidden" id="edit-sizeMM">
+                <label for="edit-type">Type:</label>
+                <!-- Changed to Select element -->
+                <select id="edit-type" required>
+                    <!-- Options populated by JS -->
+                </select>
+                <label for="edit-material">Material:</label>
+                <!-- Changed to Select element -->
+                <select id="edit-material" required>
+                     <!-- Options populated by JS -->
+                </select>
+                <label for="edit-size">Size (US):</label>
+                <input type="number" id="edit-size" required><br>
+                <label for="edit-length">Length (in):</label>
+                <input type="number" id="edit-length" required><br>
+                 <label for="edit-sets">Sets (DPN only):</label>
+                <input type="number" id="edit-sets"><br>
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+// Updated knitting needle data with the 'sets' property for DPNs
+/*
+const initialNeedles = [
+    { id: 1, type: 'Circular', material: 'Bamboo', size: 8, length: 32, sets: null },
+    { id: 2, type: 'DPN', material: 'Metal', size: 3, length: 6, sets: 5 },
+    { id: 3, type: 'Circular', material: 'Metal', size: 8, length: 24, sets: null },
+    { id: 4, type: 'Straight', material: 'Plastic', size: 10, length: 12, sets: null },
+    { id: 5, type: 'DPN', material: 'Bamboo', size: 8, length: 5, sets: 4 },
+    { id: 6, type: 'Circular', material: 'Wood', size: 8, length: 40, sets: null },
+    { id: 7, type: 'Straight', material: 'Metal', size: 5, length: 10, sets: null },
+    { id: 8, type: 'Circular', material: 'Plastic', size: 10, length: 16, sets: null },
+    { id: 9, type: 'DPN', material: 'Aluminum', size: 12, length: 14, sets: 4 }
+];
+// NOTE: Added 'id' property to each object for easy identification
+*/
+// replaced with needles-filter021.js
+
+const needleListBody = document.getElementById('needleList');
+const editModal = document.getElementById('editModal');
+const editForm = document.getElementById('editForm');
+// New references for the edit form selects
+const editTypeSelect = document.getElementById('edit-type');
+const editMaterialSelect = document.getElementById('edit-material');
+// ... (References to sort/filter selects as before) ...
+
+// ... (DOM element references remain the same) ...
+const sortBySelect = document.getElementById('sortBy');
+const filterKeySelect1 = document.getElementById('filterKey1');
+const filterValueSelect1 = document.getElementById('filterValue1');
+const filterKeySelect2 = document.getElementById('filterKey2');
+const filterValueSelect2 = document.getElementById('filterValue2');
+
+// --- Rendering Function (Updated with Edit Button) ---
+function renderNeedles(needlesToRender) {
+    needleListBody.innerHTML = '';
+    if (needlesToRender.length === 0) {
+        // Updated colspan to 6 for the new 'Actions' column
+        needleListBody.innerHTML = '<tr><td colspan="6">No needles found matching criteria.</td></tr>';
+        return;
+    }
+    needlesToRender.forEach(needle => {
+        const row = document.createElement('tr');
+        const setsDisplay = needle.sets ? needle.sets : ''; 
+        row.innerHTML = `
+            <td>${needle.size}</td>
+            <td>${needle.type}</td>
+            <td>${needle.material}</td>
+            <td>(${needle.sizeMM})</td>
+            <td>${needle.length}</td>
+            <td>${setsDisplay}</td>
+            <td><button class="edit-btn" data-id="${needle.id}">Edit</button></td>
+        `;
+        needleListBody.appendChild(row);
+    });
+}
+
+// --- Dynamic Filter Dropdown Population Function (Updated Comparator & New Key) ---
+function updateFilterValuesDropdown(filterSetIndex) {
+    const filterKeySelect = (filterSetIndex === 1) ? filterKeySelect1 : filterKeySelect2;
+    const filterValueSelect = (filterSetIndex === 1) ? filterValueSelect1 : filterValueSelect2;
+    
+    const filterKey = filterKeySelect.value;
+    filterValueSelect.innerHTML = '<option value="all">All Values</option>';
+    filterValueSelect.disabled = true;
+
+    if (filterKey !== 'none') {
+        filterValueSelect.disabled = false;
+
+        let uniqueValues = [...new Set(initialNeedles.map(item => item[filterKey]))];
+        
+        // Remove 'null' or undefined from filter options for cleaner UI
+        uniqueValues = uniqueValues.filter(value => value !== null && typeof value !== 'undefined');
+
+        // Fixed Sort Comparator for Unique Values
+        uniqueValues.sort((a, b) => {
+            if (!isNaN(Number(a)) && !isNaN(Number(b))) {
+                 return Number(a) - Number(b);
+            }
+            return String(a).localeCompare(String(b));
+        });
+
+        uniqueValues.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            filterValueSelect.appendChild(option);
+        });
+    }
+
+    processNeedles();
+}
+
+// --- Main Sorting and Filtering Logic Function (Updated Comparator & New Key) ---
+function processNeedles() {
+    const sortKey = sortBySelect.value;
+    const filterKey1 = filterKeySelect1.value;
+    const filterValue1 = filterValueSelect1.value;
+    const filterKey2 = filterKeySelect2.value;
+    const filterValue2 = filterValueSelect2.value;
+
+    let processedNeedles = [...initialNeedles];
+
+    // 1. Apply Sorting
+    processedNeedles.sort((a, b) => {
+        // Handle potential null/undefined values gracefully during sort
+        const valA = a[sortKey] === null || typeof a[sortKey] === 'undefined' ? (sortKey === 'sets' ? -1 : '') : a[sortKey];
+        const valB = b[sortKey] === null || typeof b[sortKey] === 'undefined' ? (sortKey === 'sets' ? -1 : '') : b[sortKey];
+
+        if (!isNaN(Number(valA)) && !isNaN(Number(valB)) && valA !== '' && valB !== '') {
+             return Number(valA) - Number(valB);
+        }
+        return String(valA).localeCompare(String(valB));
+    });
+
+    // 2. Apply Filter 1
+    if (filterKey1 !== 'none' && filterValue1 !== 'all') {
+        processedNeedles = processedNeedles.filter(needle => {
+            return String(needle[filterKey1]) === String(filterValue1);
+        });
+    }
+
+    // 3. Apply Filter 2
+    if (filterKey2 !== 'none' && filterValue2 !== 'all') {
+        processedNeedles = processedNeedles.filter(needle => {
+            return String(needle[filterKey2]) === String(filterValue2);
+        });
+    }
+
+    // 4. Render the results
+    renderNeedles(processedNeedles);
+}
+
+// --- Reset Function and Initial Setup remain the same ---
+function resetNeedles() {
+    sortBySelect.value = 'type';
+    filterKeySelect1.value = 'none';
+    filterKeySelect2.value = 'none';
+    
+    updateFilterValuesDropdown(1); 
+    updateFilterValuesDropdown(2);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateFilterValuesDropdown(1);
+    updateFilterValuesDropdown(2);
+});
+
+
+// --- Edit Modal Functions ---
+
+// --- Helper function to populate a select dropdown with unique values ---
+function populateEditSelect(selectElement, propertyName, selectedValue = null) {
+    selectElement.innerHTML = ''; // Clear existing options
+    const uniqueValues = [...new Set(initialNeedles.map(item => item[propertyName]))]
+        .filter(v => v !== null && typeof v !== 'undefined')
+        .sort((a, b) => {
+            if (!isNaN(Number(a)) && !isNaN(Number(b))) return Number(a) - Number(b);
+            return String(a).localeCompare(String(b));
+        });
+
+    uniqueValues.forEach(value => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        if (selectedValue === value) {
+            option.selected = true; // Set the currently selected item
+        }
+        selectElement.appendChild(option);
+    });
+}
+
+
+// --- Edit Modal Functions (Updated) ---
+function openModal(id) {
+    const needleToEdit = initialNeedles.find(n => n.id == id);
+    if (!needleToEdit) return;
+    document.getElementById('edit-id').value = needleToEdit.id;
+    document.getElementById('edit-sizeMM').value = needleToEdit.sizeMM;
+    document.getElementById('edit-size').value = needleToEdit.size;
+    document.getElementById('edit-length').value = needleToEdit.length;
+    document.getElementById('edit-sets').value = needleToEdit.sets || '';
+
+    // Populate and pre-select the dropdowns
+    populateEditSelect(editTypeSelect, 'type', needleToEdit.type);
+    populateEditSelect(editMaterialSelect, 'material', needleToEdit.material);
+    
+    editModal.style.display = 'block';
+}
+
+function closeModal() {
+    editModal.style.display = 'none';
+}
+
+// Event listener for the table body using event delegation
+needleListBody.addEventListener('click', (event) => {
+    if (event.target.classList.contains('edit-btn')) {
+        const needleId = event.target.getAttribute('data-id');
+        openModal(needleId);
+    }
+});
+
+// Handle the submission of the edit form (Updated to read from selects)
+editForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const id = parseInt(document.getElementById('edit-id').value);
+    const sizeMM = parseInt(document.getElementById('edit-sizeMM').value);
+
+    let numString = sizeMM;  //is a string
+    let myNumber = parseFloat(numString);
+    const formattedString = myNumber.toFixed(2); // "123.46"
+
+    // Read values from the new select elements
+    const updatedType = editTypeSelect.value; 
+    const updatedMaterial = editMaterialSelect.value;
+    const updatedSize = parseInt(document.getElementById('edit-size').value);
+    const updatedLength = parseInt(document.getElementById('edit-length').value);
+    const updatedSetsInput = document.getElementById('edit-sets').value;
+    const updatedSets = updatedSetsInput ? parseInt(updatedSetsInput) : null;
+
+    const index = initialNeedles.findIndex(needle => needle.id === id);
+    if (index !== -1) {
+        initialNeedles[index] = {
+            id: id,
+            type: updatedType,
+            material: updatedMaterial,
+            size: updatedSize,
+            sizeMM: formattedString,
+            length: updatedLength,
+            sets: updatedSets
+        };
+        closeModal();
+        processNeedles(); 
+    }
+});
+
+    </script>
+</body>
+</html>
