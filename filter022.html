@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1" />
     <title>filter022 Sort and Filter Needles (Table Display)</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
     <style>
@@ -31,16 +31,36 @@
     <script src="needles-filter022.js"></script>
 </head>
 <body>
-    <h1>filter022 Sort and Filter Knitting Needles</h1>
+<div class="container">
+    <nav>
+        <ul>
+            <li><img src="kneedle-logo.svg" alt="Kneedle Cache logo" height="100"  width="100" /></li>
+            <li><h3>Kneedle Cache</h3></li>
+
+            <li>
+                <span id="themeToggle" class="contrast" aria-label="Turn off dark mode" data-discover="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32" fill="currentColor" class="icon-theme-toggle  moon">
+                        <clipPath id="theme-toggle-cutout">
+                            <path d="M0-11h25a1 1 0 0017 13v30H0Z"></path>
+                        </clipPath>
+                        <g clip-path="url(#theme-toggle-cutout)">
+                            <circle cx="16" cy="16" r="8.4"></circle>
+                            <path d="M18.3 3.2c0 1.3-1 2.3-2.3 2.3s-2.3-1-2.3-2.3S14.7.9 16 .9s2.3 1 2.3 2.3zm-4.6 25.6c0-1.3 1-2.3 2.3-2.3s2.3 1 2.3 2.3-1 2.3-2.3 2.3-2.3-1-2.3-2.3zm15.1-10.5c-1.3 0-2.3-1-2.3-2.3s1-2.3 2.3-2.3 2.3 1 2.3 2.3-1 2.3-2.3 2.3zM3.2 13.7c1.3 0 2.3 1 2.3 2.3s-1 2.3-2.3 2.3S.9 17.3.9 16s1-2.3 2.3-2.3zm5.8-7C9 7.9 7.9 9 6.7 9S4.4 8 4.4 6.7s1-2.3 2.3-2.3S9 5.4 9 6.7zm16.3 21c-1.3 0-2.3-1-2.3-2.3s1-2.3 2.3-2.3 2.3 1 2.3 2.3-1 2.3-2.3 2.3zm2.4-21c0 1.3-1 2.3-2.3 2.3S23 7.9 23 6.7s1-2.3 2.3-2.3 2.4 1 2.4 2.3zM6.7 23C8 23 9 24 9 25.3s-1 2.3-2.3 2.3-2.3-1-2.3-2.3 1-2.3 2.3-2.3z"></path>
+                        </g>
+                    </svg>
+                </span>
+            </li>
+        </ul>
+        </nav>
 
     <div class="controls">
         <!-- Sort Control -->
         <div class="form-group">
             <label for="sortBy">Sort By:</label>
             <select id="sortBy" onchange="processNeedles()">
+                <option value="size">Size (US)</option>
                 <option value="type">Type</option>
                 <option value="material">Material</option>
-                <option value="size">Size (US)</option>
                 <option value="length">Length (in)</option>
                 <!-- Add Sets to sort options -->
                 <option value="sets">Sets</option>
@@ -80,19 +100,15 @@
 
     </div>
 
-    <h2>Needle List</h2>
-    <table width="100%">
-        <thead>
-            <!-- ADDED NEW HEADER -->
-            <tr><th>Size (US)</th><th>Type</th><th>Material</th><th>Size (mm)</th><th>Length (in)</th><th>Sets (DPNs)</th></tr>
-        </thead>
-        <tbody id="needleList">
-            <!-- Needles will be dynamically inserted here -->
-        </tbody>
-    </table>
+    <!-- Needle List Display -->
+    <h2>My Needles</h2>
+    <div id="needleList">
+        <!-- Needles will be dynamically added here -->
+    </div>
+
 
     <!-- The Edit Modal (Updated Inputs) -->
-    <div id="editModal" class="modal">
+    <dialog id="editModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
             <h2>Edit Needle</h2>
@@ -118,7 +134,7 @@
                 <button type="submit">Save Changes</button>
             </form>
         </div>
-    </div>
+    </dialog>
 
     <script>
 // Updated knitting needle data with the 'sets' property for DPNs
@@ -158,21 +174,31 @@ function renderNeedles(needlesToRender) {
     needleListBody.innerHTML = '';
     if (needlesToRender.length === 0) {
         // Updated colspan to 6 for the new 'Actions' column
-        needleListBody.innerHTML = '<tr><td colspan="6">No needles found matching criteria.</td></tr>';
+        needleListBody.innerHTML = 'No needles found matching criteria.';
         return;
     }
+
     needlesToRender.forEach(needle => {
-        const row = document.createElement('tr');
+        const row = document.createElement('details');
+        row.classList.add('needle-item');
+//        const row = document.createElement('tr');
         const setsDisplay = needle.sets ? needle.sets : ''; 
         row.innerHTML = `
-            <td>${needle.size}</td>
-            <td>${needle.type}</td>
-            <td>${needle.material}</td>
-            <td>(${needle.sizeMM})</td>
-            <td>${needle.length}</td>
-            <td>${setsDisplay}</td>
-            <td><button class="edit-btn" data-id="${needle.id}">Edit</button></td>
+            <summary>
+                <div role="group">
+                    <div>${needle.size}</div>
+                    <div>${needle.type}</div>
+                    <div>${needle.length}</div>
+                </div>
+            </summary>
+            <div id="needle-item-det" class="grid">
+                <div>${needle.material}</div>
+                <div>${needle.sizeMM} mm</div>
+                <div>${setsDisplay}</div>
+                <button class="edit-btn" data-id="${needle.id}">Edit</button>
+            </div>
         `;
+//        needleListBody.appendChild(row);
         needleListBody.appendChild(row);
     });
 }
@@ -358,5 +384,6 @@ editForm.addEventListener('submit', (event) => {
 });
 
     </script>
+</div>    
 </body>
 </html>
