@@ -2,29 +2,171 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1" />
-    <title>filter022 Sort and Filter Needles (Table Display)</title>
+    <title>filter025 Sort and Filter Needles (Table Display)</title>
+    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
     <style>
-        /* Minimal CSS for the Modal */
-        .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); }
-        .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 300px; }
-        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
-        .close:hover, .close:focus { color: black; text-decoration: none; cursor: pointer; }
-        .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
-        .form-group {
-            width: 100%;
-            display: flex; /* Makes the container a flex container */
-            align-items: center; /* Vertically aligns the items in the center */
-            gap: 10px; /* Adds space between the label and the select element */
-        }
-        select {
-            width: auto !important;
-            padding: 0.4rem !important;
-        }
-        select#sortBy {
-            width: 40% !important;
+    /* Orange color for light color scheme (Default) */
+    /* Can be forced with data-theme="light" */
+    [data-theme=light],
+    :root:not([data-theme=dark]),
+    :host:not([data-theme=dark]) {
+    --pico-text-selection-color: rgba(244, 93, 44, 0.25);
+    --pico-primary: #bd3c13;
+    --pico-primary-background: #00895A;
+    --pico-primary-underline: rgba(189, 60, 19, 0.5);
+    --pico-primary-hover: #942d0d;
+    --pico-primary-hover-background: #bd3c13;
+    --pico-primary-focus: rgba(244, 93, 44, 0.5);
+    --pico-primary-inverse: #fff;
+    }
 
-        }
+    /* Orange color for dark color scheme (Auto) */
+    /* Automatically enabled if user has Dark mode enabled */
+    @media only screen and (prefers-color-scheme: dark) {
+    :root:not([data-theme]),
+    :host:not([data-theme]) {
+        --pico-text-selection-color: rgba(245, 107, 61, 0.1875);
+        --pico-primary: #f56b3d;
+        --pico-primary-background: #00895A;
+        --pico-primary-underline: rgba(245, 107, 61, 0.5);
+        --pico-primary-hover: #f8a283;
+        --pico-primary-hover-background: #e74b1a;
+        --pico-primary-focus: rgba(245, 107, 61, 0.375);
+        --pico-primary-inverse: #fff;
+    }
+    }
+    /* Orange color for dark color scheme (Forced) */
+    /* Enabled if forced with data-theme="dark" */
+    [data-theme=dark] {
+    --pico-text-selection-color: rgba(245, 107, 61, 0.1875);
+    --pico-primary: #f56b3d;
+    --pico-primary-background: #00895A
+    --pico-primary-underline: rgba(245, 107, 61, 0.5);
+    --pico-primary-hover: #f8a283;
+    --pico-primary-hover-background: #e74b1a;
+    --pico-primary-focus: rgba(245, 107, 61, 0.375);
+    --pico-primary-inverse: #fff;
+    }
+
+
+    /* Minimal CSS for the Modal */
+    .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); }
+    .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 300px; }
+    .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+    .close:hover, .close:focus { color: black; text-decoration: none; cursor: pointer; }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+    .form-group {
+        width: 100%;
+        display: flex; /* Makes the container a flex container */
+        align-items: center; /* Vertically aligns the items in the center */
+        gap: 10px; /* Adds space between the label and the select element */
+    }
+    select {
+        width: auto !important;
+        padding: 0.4rem !important;
+    }
+    select#sortBy {
+        width: 40% !important;
+
+    }
+
+    .message-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+
+
+    .header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+    }
+    .author {
+        margin: 0;
+        font-size: 0.9em;
+    }
+    .date {
+        font-size: 0.7em;
+    }
+    .title {
+        margin: 0;
+        font-size: 1em;
+        text-overflow: ellipsis;
+        word-break: break-word;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+    .text {
+        font-size: 0.9em;
+        text-overflow: ellipsis;
+        word-break: break-word;
+        white-space: nowrap;
+        overflow: hidden;
+        margin: 0;
+    }
+
+    .needle-item {  /* card */
+        display: flex;
+        align-items: flex-start; /* Vertically aligns items to the top of the container */
+    }
+    article.needle-item {
+    --pico-primary: red; /* Override primary color for this article */
+    --pico-block-spacing-vertical: 0.5rem;
+    --pico-block-spacing-horizontal: 0.5rem;
+    --pico-typography-spacing-vertical: 0.5rem;
+    }
+
+    .icon-container {
+        margin-right: 1rem;
+        /* Adjust width as needed */
+        flex-shrink: 0; /* Prevents the icon from shrinking if content is long */
+    }
+    .icon-container h3 {
+        padding-left: 0.4rem;
+    }
+    .content-container {
+        flex-grow: 1; /* Allows the content to fill the remaining space */
+    }
+
+    /* Pure CSS Icon Styles (Example: A simple circle) */
+    .css-icon {
+        width: 3rem;
+        height: 3rem;
+        box-sizing: content-box;
+        padding: 0.4rem;
+        display: flex;
+        align-items: center; /* Vertically center text */
+        justify-content: center; /* Horizontally center text */
+        color: white;
+        font-family: Arial, sans-serif;
+        font-size: 3rem;
+        font-weight: bold;
+        background-color: var(--pico-primary-background);
+        border-radius: var(--pico-border-radius);
+    }
+
+    .css-icon::before {
+        content: "";
+        color: white;
+        font-size: 24px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-weight: bold;
+    }
+    .css-icon.has-decimal {
+        font-size: 2.4rem;
+    }
+    .css-icon.has-decimal-sm {
+        font-size: 1.8rem;
+    }
+    h3 {
+        margin-top: 0; /* Removes default margin issues with flexbox alignment */
+    }
     </style>
     
     <!-- Load the data file first -->
@@ -179,29 +321,97 @@ function renderNeedles(needlesToRender) {
     }
 
     needlesToRender.forEach(needle => {
-        const row = document.createElement('details');
+        const row = document.createElement('article');
         row.classList.add('needle-item');
 //        const row = document.createElement('tr');
-        const setsDisplay = needle.sets ? needle.sets : ''; 
+        const setsDisplay = needle.sets ? needle.sets : '';
+
+// Check if number is decimal then add class has-decimal
+        const iconText = needle.size; // Example text
+        const numberValue = parseFloat(iconText); // Parse the text content to a float
+        const number = Number(numberValue);
+        let circleIconClass ='';
+        if (typeof number === 'number' && Number.isSafeInteger(number)) {
+            circleIconClass = 'css-icon';
+        } else if (number === 10.5) {
+            circleIconClass = 'css-icon has-decimal-sm';// Add the CSS class
+        } else {
+            circleIconClass = 'css-icon has-decimal';// Add the CSS class
+        }
+
+
         row.innerHTML = `
-            <summary>
-                <div role="group">
-                    <div>${needle.size}</div>
-                    <div>${needle.type}</div>
-                    <div>${needle.length}</div>
+
+                <div class="icon-container">
+                    <!-- Pure CSS Icon will be here -->
+                    <div id="circleIcon" class="${circleIconClass}">${needle.size}</div>
+                    <h3>${needle.length} in</h3>
                 </div>
-            </summary>
-            <div id="needle-item-det" class="grid">
-                <div>${needle.material}</div>
-                <div>${needle.sizeMM} mm</div>
-                <div>${setsDisplay}</div>
-                <button class="edit-btn" data-id="${needle.id}">Edit</button>
-            </div>
+                <div class="content-container">
+                    <h3>${needle.type}</h3>
+                    
+                    <p>${needle.material}</p>
+                    <p>${needle.sizeMM} mm</p>
+                    <p>${setsDisplay}</p>
+                    <!-- <button class="edit-btn" data-id="${needle.id}">Edit</button> -->
+                </div>
+
         `;
-//        needleListBody.appendChild(row);
+
+
+/*         if (Number.isInteger(number)) { // Check if the number has a decimal
+            circleIconElement.classList.add('has-decimal'); // Add the CSS class
+console.log('YES decimal add class');
+        } */
+
         needleListBody.appendChild(row);
     });
+}  //END function renderNeedles(needlesToRender)
+
+
+function checkDecimal(needle) {
+    const iconText = needle.size; // Example text
+
+    //TESTING make decimal numbers small by adding class has-decimal
+    const testcontdiv = document.createElement('div');
+    testcontdiv.id = 'testcont';
+
+
+    // Get the circle icon element
+    const circleIconElement = document.getElementById("circleIcon");
+    const numberValue = parseFloat(iconText); // Parse the text content to a float
+    const number = Number(numberValue);
+
+
+
+        if (iconText > 10) {
+            console.log('iconText: '+iconText+' numberValue: '+numberValue+' number: '+number);
+ //           console.log(typeof numberValue === 'number'); 
+            console.log(circleIconElement);
+        }
+
+        // Set the inner text of the circle icon
+        if (circleIconElement) {
+            circleIconElement.innerText = iconText;
+        }
+
+
+
+        // Check if the value is a number and a safe integer
+        if (typeof number === 'number' && Number.isSafeInteger(number)) {
+//            circleIconElement.classList.add('has-decimal'); // Add the CSS class
+            testcontdiv.innerHTML = 'No whole';
+            circleIcon
+            
+//row.classList.add('needle-item');
+        } else {
+            console.log(number+' YES decimal add class | ');
+            testcontdiv.innerHTML = '${number} YES decimal add class';
+            circleIconElement.classList.add('has-decimal'); // Add the CSS class
+        }
+    needleListBody.appendChild(testcontdiv);
 }
+
 
 // --- Dynamic Filter Dropdown Population Function (Updated Comparator & New Key) ---
 function updateFilterValuesDropdown(filterSetIndex) {
