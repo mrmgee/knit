@@ -5,7 +5,8 @@ const initialNeedles = [
             "material": "Aluminum",
             "size": "2",
             "sizeMM": "2.75",
-            "length": "6"
+            "length": "6",
+            "sets": "4"
         },
         {
             "id": 1762451686866,
@@ -13,7 +14,8 @@ const initialNeedles = [
             "material": "Bamboo",
             "size": "4",
             "sizeMM": "3.50",
-            "length": "7"
+            "length": "7",
+            "sets": "5"
         },
         {
             "id": 1762451708540,
