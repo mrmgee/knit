@@ -1,425 +1,891 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kneedle Cache</title>
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1" />
+    <title>filter027 Sort and Filter Needles (Table Display)</title>
+    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
     <style>
-        body .container #needleList h4 {
-            padding: 0.2rem;
-            color: #CBFCE1;
-            background-color: #00895A !important;
-        }
-        html[data-theme="dark"] #needleList h4 {
-            padding: 0.2rem;
-            color: #fff;
-            background-color: #00895A !important;
-        }
-        .hide {
-            display: none;
-        }
+    /* Orange color for light color scheme (Default) */
+    /* Can be forced with data-theme="light" */
+    [data-theme=light],
+    :root:not([data-theme=dark]),
+    :host:not([data-theme=dark]) {
+    --pico-text-selection-color: rgba(244, 93, 44, 0.25);
+    --pico-primary: #bd3c13;
+    --pico-primary-background: #00895A;
+    --pico-primary-underline: rgba(189, 60, 19, 0.5);
+    --pico-primary-hover: #942d0d;
+    --pico-primary-hover-background: #bd3c13;
+    --pico-primary-focus: rgba(244, 93, 44, 0.5);
+    --pico-primary-inverse: #fff;
+    }
+
+    /* Orange color for dark color scheme (Auto) */
+    /* Automatically enabled if user has Dark mode enabled */
+    @media only screen and (prefers-color-scheme: dark) {
+    :root:not([data-theme]),
+    :host:not([data-theme]) {
+        --pico-text-selection-color: rgba(245, 107, 61, 0.1875);
+        --pico-primary: #f56b3d;
+        --pico-primary-background: #00895A;
+        --pico-primary-underline: rgba(245, 107, 61, 0.5);
+        --pico-primary-hover: #f8a283;
+        --pico-primary-hover-background: #e74b1a;
+        --pico-primary-focus: rgba(245, 107, 61, 0.375);
+        --pico-primary-inverse: #fff;
+    }
+    }
+    /* Orange color for dark color scheme (Forced) */
+    /* Enabled if forced with data-theme="dark" */
+    [data-theme=dark] {
+    --pico-text-selection-color: rgba(245, 107, 61, 0.1875);
+    --pico-primary: #f56b3d;
+    --pico-primary-background: #00895A
+    --pico-primary-underline: rgba(245, 107, 61, 0.5);
+    --pico-primary-hover: #f8a283;
+    --pico-primary-hover-background: #e74b1a;
+    --pico-primary-focus: rgba(245, 107, 61, 0.375);
+    --pico-primary-inverse: #fff;
+    }
+
+
+    /* Minimal CSS for the Modal */
+    .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); }
+    .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 300px; }
+    .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+    .close:hover, .close:focus { color: black; text-decoration: none; cursor: pointer; }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+    .form-group {
+        width: 100%;
+        display: flex; /* Makes the container a flex container */
+        align-items: center; /* Vertically aligns the items in the center */
+        gap: 10px; /* Adds space between the label and the select element */
+    }
+    select {
+        width: auto !important;
+        padding: 0.4rem !important;
+    }
+    select#sortBy {
+        width: 40% !important;
+
+    }
+
+    .message-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+
+
+    .header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+    }
+    .author {
+        margin: 0;
+        font-size: 0.9em;
+    }
+    .date {
+        font-size: 0.7em;
+    }
+    .title {
+        margin: 0;
+        font-size: 1em;
+        text-overflow: ellipsis;
+        word-break: break-word;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+    .text {
+        font-size: 0.9em;
+        text-overflow: ellipsis;
+        word-break: break-word;
+        white-space: nowrap;
+        overflow: hidden;
+        margin: 0;
+    }
+
+    .needle-item {  /* card */
+        display: flex;
+        align-items: flex-start; /* Vertically aligns items to the top of the container */
+    }
+    article.needle-item {
+    --pico-primary: red; /* Override primary color for this article */
+    --pico-block-spacing-vertical: 0.5rem;
+    --pico-block-spacing-horizontal: 0.5rem;
+    --pico-typography-spacing-vertical: 0.5rem;
+    }
+
+    .icon-container {
+        margin-right: 1rem;
+        /* Adjust width as needed */
+        flex-shrink: 0; /* Prevents the icon from shrinking if content is long */
+    }
+    .icon-container h3 {
+/*        padding-left: 0.4rem; */
+        font-size: 1.2rem;
+        text-align: center;
+    }
+    .content-container {
+        flex-grow: 1; /* Allows the content to fill the remaining space */
+    }
+    .content-container.grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto; /* Three equal columns */
+        grid-template-rows: auto 1fr;   /* Defines two rows: one for header, one for content */
+        gap: 0.2rem;                     /* Optional: Adds space between grid items */
+    }
+    .content-container h3 {
+        grid-column: 1 / 3;
+        margin-top: 0;
+        margin-bottom: 0.2rem;
+    }
+
+
+
+    /* Pure CSS Icon Styles (Example: A simple circle) */
+    .css-icon {
+        width: 3rem;
+        height: 3rem;
+        box-sizing: content-box;
+        padding: 0.4rem;
+        display: flex;
+        align-items: center; /* Vertically center text */
+        justify-content: center; /* Horizontally center text */
+        color: white;
+        font-family: Arial, sans-serif;
+        font-size: 3rem;
+        font-weight: bold;
+        background-color: var(--pico-primary-background);
+        border-radius: var(--pico-border-radius);
+    }
+
+    .css-icon::before {
+        content: "";
+        color: white;
+        font-size: 24px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-weight: bold;
+    }
+    .css-icon.has-decimal {
+        font-size: 2.4rem;
+    }
+    .css-icon.has-decimal-sm {
+        font-size: 1.8rem;
+    }
+    .container h2 {
+        margin-top: var(--pico-block-spacing-vertical);
+    }
+    h3 {
+        margin-top: 0; /* Removes default margin issues with flexbox alignment */
+    }
+    .edit-btn {
+        padding: 0.2rem;
+        color: var(--pico-secondary-inverse);
+        background-color: var(--pico-switch-background-color);
+        border-radius: var(--pico-border-radius);
+        cursor: pointer;
+    }
+
+
+
+    .pencil {
+        width: 0.5rem;  /* 10px  */
+        height: 1.4rem;  /* 50px  */
+        background: dimgray ;
+        position: relative ;
+        transform: rotate(30deg);
+    }
+    .pencil::before {
+        content: "" ;
+        position: absolute ;
+        width: 10px ;
+        height: 10px ;
+        background: dimgray ;
+        top: -13px ;
+    }
+    .pencil::after {
+        content: "" ;
+        position: absolute ;
+        width: 8px ;
+        height: 8px ;
+        background: dimgray ;
+        left: 1px ;
+        bottom: -4px ;
+        transform: rotate(45deg);
+    }
     </style>
+    
+    <!-- Load the data file first -->
+    <script src="needles-filter022.js"></script>
 </head>
 <body>
-    <div class="container">
-        <nav>
-            <ul>
-              <li><img src="kneedle-logo.svg" alt="Kneedle Cache logo" height="100"  width="100" /></li>
-              <li><h3>Kneedle Cache</h3></li>
+<div class="container">
+    <nav>
+        <ul>
+            <li><img src="kneedle-logo.svg" alt="Kneedle Cache logo" height="100"  width="100" /></li>
+            <li><h3>Kneedle Cache</h3></li>
 
-                <li>
-                    <span id="themeToggle" class="contrast" aria-label="Turn off dark mode" data-discover="true">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32" fill="currentColor" class="icon-theme-toggle  moon">
-                            <clipPath id="theme-toggle-cutout">
-                                <path d="M0-11h25a1 1 0 0017 13v30H0Z"></path>
-                            </clipPath>
-                            <g clip-path="url(#theme-toggle-cutout)">
-                                <circle cx="16" cy="16" r="8.4"></circle>
-                                <path d="M18.3 3.2c0 1.3-1 2.3-2.3 2.3s-2.3-1-2.3-2.3S14.7.9 16 .9s2.3 1 2.3 2.3zm-4.6 25.6c0-1.3 1-2.3 2.3-2.3s2.3 1 2.3 2.3-1 2.3-2.3 2.3-2.3-1-2.3-2.3zm15.1-10.5c-1.3 0-2.3-1-2.3-2.3s1-2.3 2.3-2.3 2.3 1 2.3 2.3-1 2.3-2.3 2.3zM3.2 13.7c1.3 0 2.3 1 2.3 2.3s-1 2.3-2.3 2.3S.9 17.3.9 16s1-2.3 2.3-2.3zm5.8-7C9 7.9 7.9 9 6.7 9S4.4 8 4.4 6.7s1-2.3 2.3-2.3S9 5.4 9 6.7zm16.3 21c-1.3 0-2.3-1-2.3-2.3s1-2.3 2.3-2.3 2.3 1 2.3 2.3-1 2.3-2.3 2.3zm2.4-21c0 1.3-1 2.3-2.3 2.3S23 7.9 23 6.7s1-2.3 2.3-2.3 2.4 1 2.4 2.3zM6.7 23C8 23 9 24 9 25.3s-1 2.3-2.3 2.3-2.3-1-2.3-2.3 1-2.3 2.3-2.3z"></path>
-                            </g>
-                        </svg>
-                    </span>
-                </li>
-            </ul>
-          </nav>
+            <li>
+                <span id="themeToggle" class="contrast" aria-label="Turn off dark mode" data-discover="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32" fill="currentColor" class="icon-theme-toggle  moon">
+                        <clipPath id="theme-toggle-cutout">
+                            <path d="M0-11h25a1 1 0 0017 13v30H0Z"></path>
+                        </clipPath>
+                        <g clip-path="url(#theme-toggle-cutout)">
+                            <circle cx="16" cy="16" r="8.4"></circle>
+                            <path d="M18.3 3.2c0 1.3-1 2.3-2.3 2.3s-2.3-1-2.3-2.3S14.7.9 16 .9s2.3 1 2.3 2.3zm-4.6 25.6c0-1.3 1-2.3 2.3-2.3s2.3 1 2.3 2.3-1 2.3-2.3 2.3-2.3-1-2.3-2.3zm15.1-10.5c-1.3 0-2.3-1-2.3-2.3s1-2.3 2.3-2.3 2.3 1 2.3 2.3-1 2.3-2.3 2.3zM3.2 13.7c1.3 0 2.3 1 2.3 2.3s-1 2.3-2.3 2.3S.9 17.3.9 16s1-2.3 2.3-2.3zm5.8-7C9 7.9 7.9 9 6.7 9S4.4 8 4.4 6.7s1-2.3 2.3-2.3S9 5.4 9 6.7zm16.3 21c-1.3 0-2.3-1-2.3-2.3s1-2.3 2.3-2.3 2.3 1 2.3 2.3-1 2.3-2.3 2.3zm2.4-21c0 1.3-1 2.3-2.3 2.3S23 7.9 23 6.7s1-2.3 2.3-2.3 2.4 1 2.4 2.3zM6.7 23C8 23 9 24 9 25.3s-1 2.3-2.3 2.3-2.3-1-2.3-2.3 1-2.3 2.3-2.3z"></path>
+                        </g>
+                    </svg>
+                </span>
+            </li>
+        </ul>
+        </nav>
 
-
-
-
-
-
-        <!-- Add Needle Form with Dropdowns -->
-        <form id="needleForm">
-            <label for="type">Type:</label>
-            <select id="type" required onchange="showSubset()">
-                <option value="">--Select Type--</option>
-                <option value="Straight">Straight</option>
-                <option value="Circular">Circular</option>
-                <option value="Double Pointed">Double Pointed</option>
-                <option value="Other">Other</option>
-            </select>
-
-            <select id="typeSubset" class="hide">
-                <option value="">--Select Set--</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-            </select>
-
-            <label for="material">Material:</label>
-            <select id="material" required>
-                <option value="">--Select Material--</option>
-                <option value="Aluminum">Aluminum</option>
-                <option value="Steel">Steel</option>
-                <option value="Metal">Metal</option>
-                <option value="Plastic">Plastic</option>
-                <option value="Wood">Wood</option>
-                <option value="Bamboo">Bamboo</option>
-                <option value="Carbon Fiber">Carbon Fiber</option>
-                <option value="Other">Other</option>
-            </select>
-
-
-
-<label for="sizesel">Size:</label>
-<select id="sizesel" required>
-                <option value="">-- Select size --</option>
-                <option value="000">000 (1.50 mm)</option>
-                <option value="00">00 (1.75 mm)</option>
-                <option value="0">0 (2.00 mm)</option>
-                <option value="1">1 (2.25 mm)</option>
-                <option value="1.5">1.5 (2.50 mm)</option>
-                <option value="2">2 (2.75 mm)</option>
-                <option value="2.5">2.5 (3.00 mm)</option>
-                <option value="3">3 (3.25 mm)</option>
-                <option value="4">4 (3.50 mm)</option>
-
-                <option value="5">5 (3.75 mm)</option>
-                <option value="6">6 (4.00 mm)</option>
-                <option value="7">7 (4.50 mm)</option>
-                <option value="8">8 (5.00 mm)</option>
-                <option value="9">9 (5.50 mm)</option>
-                <option value="10">10 (6.00 mm)</option>
-                <option value="10.5">10.5 (6.50 mm)</option>
-                <option value="11">11 (8.00 mm)</option>
-                <option value="13">13 (9.00 mm)</option>
-                <option value="15">15 (10.00 mm)</option>
-                <option value="17">17 (12.00 mm)</option>
-                <option value="19">19 (15.00 mm)</option>
-                <option value="35">35 (19.00 mm)</option>
-                <option value="36">36 (20.00 mm)</option>
-                <option value="50">50 (25.00 mm)</option>
-
-
-            </select>
-
-
-
-            <label for="length">Length:</label>
-            <select id="length" required>
-                <option value="">-- Select length --</option>
-                
-                <option value="5 in">5 in</option>
-                <option value="6 in">6 in</option>
-                <option value="7 in">7 in</option>
-                <option value="7.5 in">7.5 in</option>
-                <option value="8 in">8 in</option>
-                <option value="9 in">9 in</option>
-                <option value="10 in">10 in</option>
-                <option value="11 in">11 in</option>
-                <option value="12 in">12 in</option>
-                <option value="13 in">13 in</option>
-                <option value="14 in">14 in</option>
-                <option value="16 in">16 in</option>
-                <option value="24 in">24 in</option>
-                <option value="29 in">29 in</option>
-                <option value="32 in">32 in</option>
-                <option value="40 in">40 in</option>
-                <option value="47 in">47 in</option>
-                <option value="60 in">60 in</option>
-            </select>
-
-
-
-
-            <button type="submit">Add Needle</button>
-        </form>
-
-        <!-- Sorting Controls -->
-        <div class="sort-controls">
-            <label for="sortKey">Sort by:</label>
-            <select id="sortKey" onchange="displayNeedles()">
+    <div class="controls">
+        <!-- Sort Control -->
+        <div class="form-group">
+            <label for="sortBy">Sort By:</label>
+            <select id="sortBy" onchange="processNeedles()">
+                <option value="size">Size (US)</option>
                 <option value="type">Type</option>
-                <option value="sizesel">Size</option>
                 <option value="material">Material</option>
+                <option value="length">Length (in)</option>
+                <!-- Add Sets to sort options -->
+                <option value="sets">Sets</option>
+            </select>
+            <button onclick="resetNeedles()">Reset All</button>
+        </div>
+        
+        <!-- Filter 1 Controls (Same as before) -->
+        <div class="form-group">
+            <label for="filterKey1">Filter 1:</label>
+            <select id="filterKey1" onchange="updateFilterValuesDropdown(1)">
+                <option value="none">None</option>
+                <option value="type">Type</option>
+                <option value="material">Material</option>
+                <option value="size">Size (US)</option>
+                <option value="length">Length (in)</option>
+                <option value="sets">Sets</option>
+            </select>
+            <label for="filterValue1">By:</label>
+            <select id="filterValue1" onchange="processNeedles()" disabled>
+                <option value="all">All Values</option>
             </select>
         </div>
 
-        <!-- Needle List Display -->
-        <h2>My Needles</h2>
-        <div id="needleList">
-            <!-- Needles will be dynamically added here -->
+        <!-- Filter 2 Controls (Same as before) -->
+        <div class="form-group">
+            <label for="filterKey2">Filter 2:</label>
+            <select id="filterKey2" onchange="updateFilterValuesDropdown(2)">
+                <option value="none">None</option>
+                <option value="type">Type</option>
+                <option value="material">Material</option>
+                <option value="size">Size (US)</option>
+                <option value="length">Length (in)</option>
+                <option value="sets">Sets</option>
+            </select>
+            <label for="filterValue2">By:</label>
+            <select id="filterValue2" onchange="processNeedles()" disabled>
+                <option value="all">All Values</option>
+            </select>
         </div>
+
+    </div>
+
+    <div class="form-group">
+    <button id="openModalAddBtn">
+        <span class="icon-item-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-square-plus">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M9 12h6"></path><path d="M12 9v6"></path>
+                <path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z"></path>
+            </svg>
+        </span>
+        New Needle
+    </button>
+
+    <!-- Button to Download the Updated Data -->
+    <button id="downloadButton">
+        <span class="icon-item-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-download">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M14 3v4a1 1 0 0 0 1 1h4"></path>
+                <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"></path>
+                <path d="M12 17v-6"></path><path d="M9.5 14.5l2.5 2.5l2.5 -2.5"></path>
+            </svg>
+        </span>        
+        Download file</button>
+    </div>
+
+
+    <!-- Form to Add New Needles -->
+    <dialog id="openModalAdd">
+        <article>
+            <button aria-label="Close" rel="prev" onclick="closeModalAdd()"></button>
+            <h2>Add New Needle</h2>
+            <form id="addForm">
+                <select id="add-type" required></select>
+                <select id="add-material" required></select>
+                <!-- Use select elements instead of number inputs -->
+                <select id="add-size" required></select>
+                <select id="add-length" required></select>
+                <select id="add-sets"></select> <!-- Optional, so 'required' is removed -->
+                
+                <button type="submit">Add Needle</button>
+            </form>
+        </article>
+    </dialog>
+
+
+
+
+    <!-- The Edit Modal HTML needs to be updated too -->
+    <!-- Assuming you have a structure like this for your modal -->
+    <dialog id="editModal">  <!-- class="modal"-->
+        <article><!-- <div class="modal-content"> -->
+            <!-- span class="close" onclick="closeModal()">&times;</span> -->
+            <button aria-label="Close" rel="prev" onclick="closeModal()"></button>
+
+            <form id="editForm">
+            <input type="hidden" id="edit-id">
+            <input type="hidden" id="edit-sizeMM">
+            <label for="edit-type">Type:</label>
+            <select id="edit-type" required></select>
+            <label for="edit-material">Material:</label>
+            <select id="edit-material" required></select>
+            <label for="edit-size">Size (US):</label>
+            <select id="edit-size" required></select>
+            <label for="edit-length">Length (in):</label>
+            <select id="edit-length" required></select>
+            <label for="edit-sets">Sets:</label>
+            <select id="edit-sets"></select>
+            <button type="submit">Save Changes</button>
+            </form>
+        </article>
+    </dialog>
+
+
+
+
+    <!-- Needle List Display -->
+    <h2>My Needles</h2>
+    <div id="needleList">
+        <!-- Needles will be dynamically added here -->
     </div>
 
 
 
-    <button onclick="exportLocalStorageToJson()">Download JSON file</button>
-
-
 
     <script>
+// Initial knitting needle data (assumed loaded via JSON or embedded)
+// Renamed the variable to reflect that it will be modified dynamically
 
-        //Display Set if DPN selected
-        function showSubset() {
-            if (type.value == 'Double Pointed') {
-                document.getElementById('typeSubset').classList.remove('hide');
-            } else {
-                document.getElementById('typeSubset').classList.add('hide');
-            }
+// replaced with needles-filter021.js initialNeedles
+/*
+let needlesData = [
+    { id: 1, type: 'Circular', material: 'Bamboo', size: 8, length: 32, sets: null },
+    { id: 2, type: 'DPN', material: 'Metal', size: 3, length: 6, sets: 5 },
+    { id: 3, type: 'Circular', material: 'Metal', size: 8, length: 24, sets: null },
+    { id: 4, type: 'Straight', material: 'Plastic', size: 10, length: 12, sets: null },
+    { id: 5, type: 'DPN', material: 'Bamboo', size: 8, length: 5, sets: 4 },
+    { id: 6, type: 'Circular', material: 'Wood', size: 8, length: 40, sets: null },
+    { id: 7, type: 'Straight', material: 'Metal', size: 5, length: 10, sets: null },
+    { id: 8, type: 'Circular', material: 'Plastic', size: 10, length: 16, sets: null }
+];
+*/
 
-        }
+const needleListBody = document.getElementById('needleList');
 
-        //Theme toggle
-        const themeToggle = document.getElementById('themeToggle');
-        const htmlElement = document.documentElement; // or document.body
+// ... (DOM element references remain the same) ...
+const sortBySelect = document.getElementById('sortBy');
+const filterKeySelect1 = document.getElementById('filterKey1');
+const filterValueSelect1 = document.getElementById('filterValue1');
+const filterKeySelect2 = document.getElementById('filterKey2');
+const filterValueSelect2 = document.getElementById('filterValue2');
 
-        // Check for saved theme preference on page load
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-        htmlElement.setAttribute('data-theme', savedTheme);
-        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        // Default to dark if user prefers it and no saved preference
-        htmlElement.setAttribute('data-theme', 'dark');
-        } else {
-        htmlElement.setAttribute('data-theme', 'light');
-        }
-
-        themeToggle.addEventListener('click', () => {
-        const currentTheme = htmlElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        htmlElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        });
-
-
-
-
-
-        document.addEventListener('DOMContentLoaded', (event) => {
-            displayNeedles();
-        });
-        
-        document.getElementById('needleForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            addNeedle();
-        });
-        
-        function getNeedles() {
-            let needles = localStorage.getItem('knittingNeedles');
-            return needles ? JSON.parse(needles) : [];
-        }
-        
-        function saveNeedles(needles) {
-            localStorage.setItem('knittingNeedles', JSON.stringify(needles));
-        }
-        
-        function addNeedle() {
-            // Get values from dropdowns and inputs
-            const type = document.getElementById('type').value;
-            const typesub = document.getElementById('typeSubset').value;
-            const material = document.getElementById('material').value;
-            const sizesel = document.getElementById('sizesel').value;
-        
-            const length = document.getElementById('length').value;
-        
-        
-            if (!type || !material || !sizesel || !length ) {
-                alert("Please select Type, Material, Size and Length.");
-                return;
-            }
-
-            // Match US sizes to mm equivalents
-            const sizeUS = sizesel;
-
-            const usToMmMap = {
-                '000': '1.50',
-                '00': '1.75',
-                '0': '2.00',
-                '1': '2.25',
-                '1.5': '2.50',
-                '2': '2.75',
-                '2.5': '3.00',
-                '3': '3.25',
-                '4': '3.50',
-                '5': '3.75',
-                '6': '4.00',
-                '7': '4.50',
-                '8': '5.00',
-                '9': '5.50',
-                '10': '6.00',
-                '10.5': '6.50',
-                '11': '8.00',
-                '13': '9.00',
-                '15': '10.00',
-                '17': '12.00',
-                '19': '15.00',
-                '35': '19.00',
-                '36': '20.00',
-                '50': '25.00'
-            };
-            let usSizeAlt = sizesel; // Input US size (using a string key here for flexibility)
-            // Use the bracket notation to get the value, with a fallback for unknown sizes
-            let sizeMM = usToMmMap[usSizeAlt] || "Unknown size";
-        
-            const newNeedle = {
-                id: Date.now(), // Unique ID
-                type,
-                typesub,
-                material,
-                sizesel,
-                sizeMM,
-                length
-            };
-        
-            const needles = getNeedles();
-            needles.push(newNeedle);
-            saveNeedles(needles);
-            displayNeedles();
-            document.getElementById('needleForm').reset();
-            document.getElementById('type').value = ''; // Reset select to default
-            document.getElementById('material').value = ''; // Reset select to default
-
-            document.getElementById('typeSubset').classList.add('hide'); //reset Type Set subcategory
-        }
-        
-        function displayNeedles() {
-            const needles = getNeedles();
-            const sortKey = document.getElementById('sortKey').value;
-        
-            // Sort the needles based on the selected key
-            needles.sort((a, b) => {
-                if (sortKey === 'sizesel') {
-                    return a.sizesel - b.sizesel; // Numeric sort
-                } else {
-                    return a[sortKey].localeCompare(b[sortKey]); // Alphabetical sort
-                }
-            });
-        
-            const needleList = document.getElementById('needleList');
-            needleList.innerHTML = ''; // Clear current list
-            let lastCategory = null;
-            
-        
-            needles.forEach(needle => {
-
-                if (sortKey === 'sizesel') {
-                    sortCurrent = needle.sizesel;
-                } else if (sortKey === 'type') {
-                    sortCurrent = needle.type;
-                } else {
-                    sortCurrent = needle.material;
-                }
-
-                // Check if the category has changed
-                if (sortCurrent !== lastCategory) {
-                    lastCategory = sortCurrent;
-
-                    // Append the actual item content
-                    let sortMat = document.createElement('h4');  // Sort param header
-                    sortMat.innerHTML = `${sortCurrent} `;
-                    needleList.appendChild(sortMat);
-                }
-
-
-                const needleItem = document.createElement('details');
-                needleItem.classList.add('needle-item');
-                
-
-
-                const keyToCheck = 'typesub';
-                let typesubdiv = '';
-
-                if (needle.hasOwnProperty(keyToCheck)) {
-                    const value = needle[keyToCheck];
-                    if (value !== null && value !== undefined && value !== '') {
-                        console.log(`The key '${keyToCheck}' exists and its value is not empty.`);
-                        typesubdiv = ` (Set: ${needle.typesub})`;
-                        needle.typesub = 'nowThis';
-                    } else {
-                        console.log(`The key '${keyToCheck}' exists but its value is empty.`);
-                        //typesubdiv = 'poop';
-                    }
-                }
-
-
-                needleItem.innerHTML = `
-                    <summary>
-                        <div role="group">
-                            <div>${needle.sizesel}${typesubdiv}</div>
-                            <div>${needle.type}</div>
-                            <div>${needle.length}</div>
-                        </div>
-                    </summary>
-                    <div id="needle-item-det" class="grid">
-                        <div>${needle.material}</div>
-                        <div>${needle.sizeMM} mm</div>
-                        <button class="delete-btn" onclick="deleteNeedle(${needle.id})">Delete</button>
-                    </div>
-                `;
-                needleList.appendChild(needleItem);
-
-                console.log(needle.typesub);
-
-
-            });
-        }
-        
-        function deleteNeedle(id) {
-            let needles = getNeedles();
-            needles = needles.filter(needle => needle.id !== id);
-            saveNeedles(needles);
-            displayNeedles(); // Re-render the list
-        }        
+const editModalAddID = document.getElementById('openModalAdd');
+const editModal = document.getElementById('editModal');
+const editForm = document.getElementById('editForm');
+// New references for the edit form selects
+const editTypeSelect = document.getElementById('edit-type');
+const editMaterialSelect = document.getElementById('edit-material');
+const editSizeSelect = document.getElementById('edit-size');
+const editLengthSelect = document.getElementById('edit-length');
+const editSetsSelect = document.getElementById('edit-sets');
+// New references for the add form inputs
+const addForm = document.getElementById('addForm');
+const addTypeSelect = document.getElementById('add-type');
+const addMaterialSelect = document.getElementById('add-material');
+const addSizeSelect = document.getElementById('add-size');
+const addLengthSelect = document.getElementById('add-length');
+const addSetsSelect = document.getElementById('add-sets');
 
 
 
 
-        function exportLocalStorageToJson() {
-        // 1. Retrieve all data from localStorage into an object
-        const localStorageData = {};
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            const value = localStorage.getItem(key);
-            // Attempt to parse the value if it was stored as a JSON string
-            try {
-                localStorageData[key] = JSON.parse(value);
-            } catch (e) {
-                localStorageData[key] = value;
-            }
-        }
+// --- Helper function to populate a select dropdown with unique values ---
+function populateSelect(selectElement, propertyName, selectedValue = null, allowNA = false) {
+    selectElement.innerHTML = ''; 
 
-        // 2. Convert the object to a formatted JSON string
-        const jsonString = JSON.stringify(localStorageData, null, 4); // null, 4 for pretty printing
-
-        // 3. Create a Blob (Binary Large Object) from the JSON string
-        const blob = new Blob([jsonString], { type: 'application/json' });
-
-        // 4. Create a downloadable link and trigger a click
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'localStorage_export.json'; // Set the default file name
-        a.style.display = 'none';
-
-        document.body.appendChild(a);
-        a.click(); // Programmatically click the link to trigger download
-        document.body.removeChild(a);
-
-        // 5. Clean up the object URL
-        URL.revokeObjectURL(url);
+    // Handle the 'N/A' (null sets) case
+    let uniqueValues = [...new Set(initialNeedles.map(item => item[propertyName]))];
+    
+    // If we are populating sets, filter out null for sorting but re-add a specific option later
+    if (propertyName === 'sets') {
+        uniqueValues = uniqueValues.filter(v => v !== null && typeof v !== 'undefined');
     }
 
+    uniqueValues = uniqueValues
+        .filter(v => v !== null && typeof v !== 'undefined')
+        .sort((a, b) => {
+            if (!isNaN(Number(a)) && !isNaN(Number(b))) return Number(a) - Number(b);
+            return String(a).localeCompare(String(b));
+        });
+
+    const defaultOption = document.createElement('option');
+    defaultOption.value = "";
+    defaultOption.textContent = `Select ${propertyName.charAt(0).toUpperCase() + propertyName.slice(1)}`;
+    defaultOption.disabled = true;
+    defaultOption.selected = !selectedValue; 
+    selectElement.appendChild(defaultOption);
+
+    // Add N/A option for optional fields (like sets)
+    if (allowNA) {
+        const naOption = document.createElement('option');
+        naOption.value = 'null';
+        naOption.textContent = 'N/A';
+        if (selectedValue === null) {
+            naOption.selected = true;
+        }
+        selectElement.appendChild(naOption);
+    }
+
+    uniqueValues.forEach(value => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        // Use loose equality (==) for number comparisons
+        if (selectedValue == value) {
+            option.selected = true; 
+        }
+        selectElement.appendChild(option);
+    });
+}
+
+
+// --- Rendering Function (Same) ---
+function renderNeedles(needlesToRender) { 
+    needleListBody.innerHTML = '';
+
+/*     if (needlesToRender.length === 0) {
+        needleListBody.innerHTML = '<tr><td colspan="6">No needles found matching criteria.</td></tr>';
+        return;
+    } */
+    needlesToRender.forEach(needle => {
+        // const row = document.createElement('tr');
+        const row = document.createElement('article');
+        row.classList.add('needle-item');
+        const setsDisplay = needle.sets ? needle.sets : '';
+
+
+
+// Check if number is decimal then add class has-decimal
+        const iconText = needle.size; // Example text
+        const numberValue = parseFloat(iconText); // Parse the text content to a float
+        const number = Number(numberValue);
+        let circleIconClass ='';
+        if (typeof number === 'number' && Number.isSafeInteger(number)) {
+            circleIconClass = 'css-icon';
+        } else if (number === 10.5) {
+            circleIconClass = 'css-icon has-decimal-sm';// Add the CSS class
+        } else {
+            circleIconClass = 'css-icon has-decimal';// Add the CSS class
+        }
+
+        row.innerHTML = `
+        <div class="icon-container">
+        <!-- Pure CSS Icon will be here -->
+            <div id="circleIcon" class="${circleIconClass}">${needle.size}</div>
+                <h3>${needle.length} in</h3>
+            </div>
+            <div class="content-container grid">
+            <h3>${needle.type}</h3>
+            <div class="edit-btn" data-id="${needle.id}">
+                <svg xmlns="http://www.w3.org/2000/svg" data-id="${needle.id}" class="edit-btn icon icon-tabler icons-tabler-outline icon-tabler-pencil" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+                    <path d="M13.5 6.5l4 4" />
+                </svg>
+            </div>
+            <p>${needle.material}</p>
+            <p>${needle.sizeMM} mm</p>
+            <p>${setsDisplay}</p>
+
+
+            
+        </div>
+        `;
+        needleListBody.appendChild(row);
+    });
+}
+
+
+
+
+
+
+// <div class="edit-btn pencil" data-id="${needle.id}"></div>
+// <button class="edit-btn" data-id="${needle.id}">Edit</button>
+// ... (updateFilterValuesDropdown, processNeedles, resetNeedles functions remain the same) ...
+// Note: These need to be defined elsewhere in your file if they are not provided in your prompt.
+
+
+// --- Dynamic Filter Dropdown Population Function (Updated Comparator & New Key) ---
+function updateFilterValuesDropdown(filterSetIndex) {
+    const filterKeySelect = (filterSetIndex === 1) ? filterKeySelect1 : filterKeySelect2;
+    const filterValueSelect = (filterSetIndex === 1) ? filterValueSelect1 : filterValueSelect2;
+    
+    const filterKey = filterKeySelect.value;
+    filterValueSelect.innerHTML = '<option value="all">All Values</option>';
+    filterValueSelect.disabled = true;
+
+    if (filterKey !== 'none') {
+        filterValueSelect.disabled = false;
+
+        let uniqueValues = [...new Set(initialNeedles.map(item => item[filterKey]))];
+        
+        // Remove 'null' or undefined from filter options for cleaner UI
+        uniqueValues = uniqueValues.filter(value => value !== null && typeof value !== 'undefined');
+
+        // Fixed Sort Comparator for Unique Values
+        uniqueValues.sort((a, b) => {
+            if (!isNaN(Number(a)) && !isNaN(Number(b))) {
+                 return Number(a) - Number(b);
+            }
+            return String(a).localeCompare(String(b));
+        });
+
+        uniqueValues.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            filterValueSelect.appendChild(option);
+        });
+    }
+
+    processNeedles();
+}
+// --- Main Sorting and Filtering Logic Function (Updated Comparator & New Key) ---
+function processNeedles() {
+    const sortKey = sortBySelect.value;
+    const filterKey1 = filterKeySelect1.value;
+    const filterValue1 = filterValueSelect1.value;
+    const filterKey2 = filterKeySelect2.value;
+    const filterValue2 = filterValueSelect2.value;
+
+    let processedNeedles = [...initialNeedles];
+
+    // 1. Apply Sorting
+    processedNeedles.sort((a, b) => {
+        // Handle potential null/undefined values gracefully during sort
+        const valA = a[sortKey] === null || typeof a[sortKey] === 'undefined' ? (sortKey === 'sets' ? -1 : '') : a[sortKey];
+        const valB = b[sortKey] === null || typeof b[sortKey] === 'undefined' ? (sortKey === 'sets' ? -1 : '') : b[sortKey];
+
+        if (!isNaN(Number(valA)) && !isNaN(Number(valB)) && valA !== '' && valB !== '') {
+             return Number(valA) - Number(valB);
+        }
+        return String(valA).localeCompare(String(valB));
+    });
+
+    // 2. Apply Filter 1
+    if (filterKey1 !== 'none' && filterValue1 !== 'all') {
+        processedNeedles = processedNeedles.filter(needle => {
+            return String(needle[filterKey1]) === String(filterValue1);
+        });
+    }
+
+    // 3. Apply Filter 2
+    if (filterKey2 !== 'none' && filterValue2 !== 'all') {
+        processedNeedles = processedNeedles.filter(needle => {
+            return String(needle[filterKey2]) === String(filterValue2);
+        });
+    }
+
+    // 4. Render the results
+    renderNeedles(processedNeedles);
+}
+
+// --- Reset Function and Initial Setup remain the same ---
+function resetNeedles() {
+    sortBySelect.value = 'type';
+    filterKeySelect1.value = 'none';
+    filterKeySelect2.value = 'none';
+    
+    updateFilterValuesDropdown(1); 
+    updateFilterValuesDropdown(2);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateFilterValuesDropdown(1);
+    updateFilterValuesDropdown(2);
+});
+
+
+
+
+
+// --- Add New Needle Modal Functions ---
+function openModalAdd() {
+    console.log('editModalAddID: '+editModalAddID);
+    editModalAddID.style.display = 'block';
+}
+
+function closeModalAdd() {
+    editModalAddID.style.display = 'none';
+}
+document.getElementById('openModalAddBtn').addEventListener('click', openModalAdd);
+
+
+// --- Edit Modal Functions (Updated to use number selects) ---
+function openModal(id) {
+    const needleToEdit = initialNeedles.find(n => n.id == id);
+    if (!needleToEdit) return;
+
+    document.getElementById('edit-id').value = needleToEdit.id;
+    document.getElementById('edit-sizeMM').value = needleToEdit.sizeMM;
+
+    // Populate and pre-select all dropdowns
+    populateSelect(editTypeSelect, 'type', needleToEdit.type);
+    populateSelect(editMaterialSelect, 'material', needleToEdit.material);
+    populateSelect(editSizeSelect, 'size', needleToEdit.size);
+    populateSelect(editLengthSelect, 'length', needleToEdit.length);
+    // Sets field allows 'N/A' (null value)
+    populateSelect(editSetsSelect, 'sets', needleToEdit.sets, true); 
+    
+    editModal.style.display = 'block';
+}
+
+function closeModal() {
+    editModal.style.display = 'none';
+}
+
+// Event listener for the table body using event delegation
+needleListBody.addEventListener('click', (event) => {
+    if (event.target.classList.contains('edit-btn')) {
+        const needleId = event.target.getAttribute('data-id');
+        openModal(needleId);
+    }
+});
+
+// Handle the submission of the edit form (Updated to read from selects)
+editForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const id = parseInt(document.getElementById('edit-id').value);
+    const sizeMM = parseInt(document.getElementById('edit-sizeMM').value);
+    // Read values from the new select elements
+    const updatedType = editTypeSelect.value; 
+    const updatedMaterial = editMaterialSelect.value;
+    const updatedSize = parseInt(document.getElementById('edit-size').value);
+    const updatedLength = parseInt(document.getElementById('edit-length').value);
+    const updatedSetsInput = document.getElementById('edit-sets').value;
+    const updatedSets = updatedSetsInput ? parseInt(updatedSetsInput) : null;
+
+    const index = initialNeedles.findIndex(needle => needle.id === id);
+    if (index !== -1) {
+        initialNeedles[index] = {
+            id: id,
+            type: updatedType,
+            material: updatedMaterial,
+            size: updatedSize,
+            sizeMM: sizeMM,
+            length: updatedLength,
+            sets: updatedSets
+        };
+        closeModal();
+        processNeedles(); 
+    }
+});
+
+// --- NEW FUNCTIONALITY: Add Needle and Download Data ---
+
+/**
+ * Adds a new needle to the initialNeedles array based on user input from the add form.
+ */
+// --- Add New Needle and Download Data (Updated for all selects) ---
+function addNewNeedle(event) {
+    event.preventDefault();
+
+    const newId = Math.max(...initialNeedles.map(n => n.id), 0) + 1;
+
+    // Convert 'null' string value from select back to actual null
+    const setsValue = addSetsSelect.value === 'null' ? null : parseInt(addSetsSelect.value);
+
+
+    // Match US sizes to mm equivalents
+    const sizeUS = parseInt(addSizeSelect.value);
+
+    const usToMmMap = {
+        '000': '1.50',
+        '00': '1.75',
+        '0': '2.00',
+        '1': '2.25',
+        '1.5': '2.50',
+        '2': '2.75',
+        '2.5': '3.00',
+        '3': '3.25',
+        '4': '3.50',
+        '5': '3.75',
+        '6': '4.00',
+        '7': '4.50',
+        '8': '5.00',
+        '9': '5.50',
+        '10': '6.00',
+        '10.5': '6.50',
+        '11': '8.00',
+        '13': '9.00',
+        '15': '10.00',
+        '17': '12.00',
+        '19': '15.00',
+        '35': '19.00',
+        '36': '20.00',
+        '50': '25.00'
+    };
+    let usSizeAlt = sizeUS; // Input US size (using a string key here for flexibility)
+    // Use the bracket notation to get the value, with a fallback for unknown sizes
+    let sizeMMmap = usToMmMap[usSizeAlt] || "Unknown size";
+
+    let numString = sizeMMmap;  //is a string
+    let myNumber = parseFloat(numString);
+    const sizeMM = myNumber.toFixed(2); // "123.46"
+
+
+
+    const newNeedle = {
+        id: newId,
+        type: addTypeSelect.value,
+        material: addMaterialSelect.value,
+        size: parseInt(addSizeSelect.value),
+        sizeMM: sizeMM,
+        length: parseInt(addLengthSelect.value),
+        sets: setsValue
+    };
+    
+    // Basic validation
+    if (!newNeedle.type || !newNeedle.material || isNaN(newNeedle.size) || isNaN(newNeedle.length)) {
+        alert("Please select valid options for all required fields.");
+        return;
+    }
+
+    initialNeedles.push(newNeedle);
+    
+    // Refresh the table and all dropdowns across the page
+    processNeedles(); 
+    updateFilterValuesDropdown(1); 
+    updateFilterValuesDropdown(2); 
+
+    // Re-populate add form selects to include any new unique value just added
+    populateSelect(addTypeSelect, 'type');
+    populateSelect(addMaterialSelect, 'material');
+    populateSelect(addSizeSelect, 'size');
+    populateSelect(addLengthSelect, 'length');
+    populateSelect(addSetsSelect, 'sets', null, true); // Allow N/A option
+    
+    addForm.reset(); 
+    alert('New needle added successfully!');
+    closeModalAdd();
+}
+
+/**
+ * Generates the updated 'needles_data.js' file and prompts a download using the Blob API.
+ */
+function downloadNeedleData() {
+    // Convert the updated 'initialNeedles' array to a JSON string
+    const dataJsonString = JSON.stringify(initialNeedles, null, 4); // Pretty print with 4 spaces
+
+    // Wrap the JSON data in a variable declaration to make it a valid JS file
+    const fileContent = `const initialNeedles = ${dataJsonString};`;
+
+    // Create a Blob object with the file content and specify the MIME type
+    const blob = new Blob([fileContent], { type: 'text/javascript' });
+
+    // Create a temporary URL for the Blob object
+    const url = URL.createObjectURL(blob);
+
+    // Create an anchor element to trigger the download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'needles_data.js'; // The default file name for the download
+    document.body.appendChild(a); // Append anchor to body (necessary for Firefox)
+
+    // Trigger the click event on the anchor to start the download
+    a.click();
+
+    // Clean up: remove the anchor element and revoke the temporary URL
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url); // Free up memory
+}
+
+// Add event listener for the new add form
+addForm.addEventListener('submit', addNewNeedle);
+// Add event listener for a new download button (requires an element with id="downloadButton")
+document.getElementById('downloadButton').addEventListener('click', downloadNeedleData);
+
+
+
+
+
+
+
+// Initial setup when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    // Populate the initial values for the Add Form dropdowns
+    populateSelect(addTypeSelect, 'type');
+    populateSelect(addMaterialSelect, 'material');
+
+    // --- FIX IS HERE: Add these three lines to populate the number fields on load ---
+    populateSelect(addSizeSelect, 'size');
+    populateSelect(addLengthSelect, 'length');
+    populateSelect(addSetsSelect, 'sets', null, true); // The 'true' enables the 'N/A' option for sets
+    // -----------------------------------------------------------------------------
+
+    
+    // Assume processNeedles() is called here or elsewhere to initially render the table
+    processNeedles(); 
+    updateFilterValuesDropdown(1);
+    updateFilterValuesDropdown(2);
+});
+
+//Theme toggle
+const themeToggle = document.getElementById('themeToggle');
+const htmlElement = document.documentElement; // or document.body
+
+// Check for saved theme preference on page load
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme) {
+htmlElement.setAttribute('data-theme', savedTheme);
+} else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+// Default to dark if user prefers it and no saved preference
+htmlElement.setAttribute('data-theme', 'dark');
+} else {
+htmlElement.setAttribute('data-theme', 'light');
+}
+
+themeToggle.addEventListener('click', () => {
+const currentTheme = htmlElement.getAttribute('data-theme');
+const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+htmlElement.setAttribute('data-theme', newTheme);
+localStorage.setItem('theme', newTheme);
+});
+
     </script>
+</div>    
 </body>
 </html>
